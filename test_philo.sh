@@ -346,8 +346,8 @@ test_random_scenarios()
     for i in $(seq 1 $num_tests); do
         num_philosophers=$((RANDOM % max_philosophers + 1))
         time_to_die=$((RANDOM % max_time + 100))
-        time_to_eat=$((RANDOM % (time_to_die / 2) + 50))
-        time_to_sleep=$((RANDOM % (time_to_die / 2) + 50))
+        time_to_eat=$((RANDOM % (time_to_die / 2)))
+        time_to_sleep=$((RANDOM % (time_to_die / 2)))
         meal_target=$((RANDOM % max_meals + 1))
         
         args="$num_philosophers $time_to_die $time_to_eat $time_to_sleep $meal_target"
