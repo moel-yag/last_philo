@@ -1,0 +1,191 @@
+┌───────────────────────────────┐
+│          Main Thread          │
+│                               │
+│  ┌─────────────────────────┐  │
+│  │      Initialization     │  │
+│  │ - Parse arguments       │  │
+│  │ - Validate inputs       │  │
+│  │ - Initialize mutexes    │  │
+│  │   (forks, stop, print)  │  │
+│  │ - Create philosopher    │  │
+│  │   structures            │  │
+│  └───────────┬─────────────┘  │
+│              │                │
+│  ┌───────────▼─────────────┐  │
+│  │    Thread Creation      │  │
+│  │                         │  │
+│  │ ┌─────────────────────┐ │  │
+│  │ │ Monitor Thread      ├─┼──┐
+│  │ └─────────────────────┘ │  │
+│  │                         │  │
+│  │ ┌───┬───┬───┬───┬───┐   │  │
+│  │ │P1 │P2 │P3 │...│P200├─┐│  │
+│  │ └─┬─┴─┬─┴─┬─┴───┴───┘ ││  │
+│  └───┼───┼───┼───────────┼┘  │
+└──────┼───┼───┼───────────────┘
+       │   │   │
+       ▼   ▼   ▼
+┌──────┴───┴───┴──────────────────┐
+│        Philosopher Threads       │
+│                                  │
+│ ┌──────────────┐  ┌──────────────┐
+│ │  Odd ID      │  │  Even ID     │
+│ │ (Start with  │  │ (Start with  │
+│ │  right fork) │  │  left fork)  │
+│ └──────┬───────┘  └───────┬──────┘
+│        │                  │
+│ ┌──────▼──────┐    ┌──────▼──────┐
+│ │ Take right  │    │ Take left   │
+│ │ fork        │    │ fork        │
+│ └──────┬──────┘    └──────┬──────┘
+│        │                  │
+│ ┌──────▼──────┐    ┌──────▼──────┐
+│ │ Take left   │    │ Take right  │
+│ │ fork        │    │ fork        │
+│ └──────┬──────┘    └──────┬──────┘
+│        │                  │
+│        ├───────┬──────────┤
+│        │       │          │
+│ ┌──────▼──────┐│┌─────────▼──────┐
+│ │    Eat      ◄┘◄►  Eat          │
+│ │ - Update    │││ - Update       │
+│ │   last_meal │││   last_meal    │
+│ │ - Increment │││ - Increment    │
+│ │   meals     │││   meals        │
+│ └──────┬──────┘│└───────┬────────┘
+│        │       │        │
+│ ┌──────▼──────┐│┌───────▼────────┐
+│ │ Release     │││ Release        │
+│ │ forks       │││ forks          │
+│ └──────┬──────┘│└───────┬────────┘
+│        │       │        │
+│ ┌──────▼──────┐│┌───────▼────────┐
+│ │   Sleep     │││ Sleep          │
+│ └──────┬──────┘│└───────┬────────┘
+│        │       │        │
+│ ┌──────▼──────┐│┌───────▼────────┐
+│ │   Think     │││ Think          │
+│ └──────┬──────┘│└───────┬────────┘
+│        └───────┴────────┘
+│                  ▲
+└──────────────────┼──────────────────┘
+                   │
+┌──────────────────┴──────────────────┐
+│          Monitor Thread             │
+│                                     │
+│ ┌─────────────────────────────────┐ │
+│ │   Check each philosopher:       │ │
+│ │   1. Lock meal_mutex            │ │
+│ │   2. Verify time since last meal│ │
+│ │   3. If > time_to_die:          │ │
+│ │      - Set stop flag            │ │
+│ │      - Print death message      │ │
+│ │   4. Unlock meal_mutex          │ │
+│ └────────────────┬────────────────┘ │
+│                  │                  │
+│ ┌────────────────▼────────────────┐ │
+│ │ Check if all philosophers have  │ │
+│ │ reached meal target (if set)    │ │
+│ └────────────────┬────────────────┘ │
+│                  │                  │
+│ ┌────────────────▼────────────────┐ │
+│ │ Sleep 1ms between checks       │ │
+│ └─────────────────────────────────┘ │
+└─────────────────────────────────────┘
+
+Key Components Explained:
+1. Initialization (Main Thread)
+
+    Argument Parsing: Validates input parameters
+
+    Mutex Initialization:
+
+        200 fork mutexes (one per philosopher)
+
+        Global stop_mutex and print_mutex
+
+        Per-philosopher meal_mutex
+
+    Philosopher Setup:
+
+        Assigns left/right forks
+
+        Sets timing parameters
+
+        Initializes meal tracking
+
+2. Philosopher Threads (200 threads)
+
+    Odd/Even Strategy:
+
+        Odd IDs: right fork → left fork
+
+        Even IDs: left fork → right fork
+
+        Prevents circular deadlock
+
+    Eating Routine:
+
+        Updates last_meal (protected by meal_mutex)
+
+        Increments meals_eaten
+
+        Sleeps for time_to_eat
+
+    Safety Checks:
+
+        Verifies stop flag during sleeps
+
+        Single philosopher special case
+
+3. Monitor Thread (1 thread)
+
+    Death Check:
+
+        Locks philosopher's meal_mutex
+
+        Compares current time vs last_meal
+
+        Triggers death if time_to_die exceeded
+
+    Completion Check:
+
+        Verifies if all philosophers reached meal target
+
+    Efficiency:
+
+        1ms sleep between full scans
+
+        Processes all 200 philosophers per scan
+
+4. Synchronization Points
+
+    Fork Access: Mutex per fork
+
+    Meal Tracking: Per-philosopher meal_mutex
+
+    Termination: Global stop_mutex
+
+    Output: Global print_mutex
+
+5. Timing Precision
+
+    Death Detection: Within 10ms accuracy
+
+    Eating/Sleeping: Uses precise_usleep that checks stop flag every 100µs
+
+    Time Calculation: gettimeofday() for millisecond precision
+
+6. Termination Flow
+
+    Monitor detects death/meal completion
+
+    Sets global stop flag (protected by stop_mutex)
+
+    All philosopher threads see stop flag and exit
+
+    Main thread joins all threads
+
+    Resource cleanup
+
+This architecture ensures deadlock prevention, thread safety, and precise timing while efficiently handling 200 philosophers. The odd/even fork strategy breaks circular dependencies, and the monitor thread provides centralized health checking with minimal overhead.
