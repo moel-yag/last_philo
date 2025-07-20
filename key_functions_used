@@ -1,0 +1,13 @@
+// Thread management
+pthread_create()  // Create philosopher/monitor threads
+pthread_join()    // Wait for thread termination
+
+// Mutex operations
+pthread_mutex_init()   // Initialize forks/print/stop mutexes
+pthread_mutex_lock()   // Acquire fork/mutex
+pthread_mutex_unlock() // Release fork/mutex
+pthread_mutex_destroy() // Cleanup mutexes
+
+// Time management
+gettimeofday()  // Get precise timestamps
+usleep()        // Sleep (microsecond precision)
