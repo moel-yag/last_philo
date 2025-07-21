@@ -1,5 +1,5 @@
 NAME = philo
-CC = gcc
+CC = cc
 CFLAGS = -Wall -Wextra -Werror -g3 #-pthread -g3 -fsanitize=address
 
 SRCS = philo.c routine.c monitor.c parse_args.c help_routine.c cleanup.c
