@@ -6,7 +6,7 @@
 /*   By: moel-yag <moel-yag@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/06 19:44:06 by moel-yag          #+#    #+#             */
-/*   Updated: 2025/07/11 21:55:20 by moel-yag         ###   ########.fr       */
+/*   Updated: 2025/07/28 13:56:40 by moel-yag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void	precise_usleep(long duration, t_philo *philo)
 	start = get_time();
 	while (get_time() - start < duration)
 	{
-		usleep(100);
+		usleep(300); // Sleep for a short duration to avoid busy waiting
 		pthread_mutex_lock(philo->stop_mutex);
 		if (*(philo->stop))
 		{

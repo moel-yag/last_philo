@@ -6,7 +6,7 @@
 /*   By: moel-yag <moel-yag@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/27 11:39:48 by moel-yag          #+#    #+#             */
-/*   Updated: 2025/07/15 10:22:39 by moel-yag         ###   ########.fr       */
+/*   Updated: 2025/07/28 14:04:27 by moel-yag         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,6 @@ static void	routine_loop_body(t_philo *philo)
 	print_status(philo, "is sleeping");
 	precise_usleep(philo->time_to_sleep, philo);
 	print_status(philo, "is thinking");
-	usleep(100);
 }
 
 void	*routine(void *arg)
@@ -80,6 +79,7 @@ void	*routine(void *arg)
 		if (should_stop(philo))
 			break ;
 		routine_loop_body(philo);
+		usleep(500); // Small sleep to prevent busy waiting
 	}
 	return (NULL);
 }
